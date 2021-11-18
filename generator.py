@@ -23,6 +23,7 @@ normalize = str.maketrans(normalMap)
 
 customer_ids = []
 order_ids = []
+sku_ids = []
 
 Faker = Factory.create
 
@@ -102,7 +103,6 @@ def generate_order(gender, scope_date):
     order["day_of_week_i"] = scope_date.weekday()
     order["day_of_week"] = calendar.day_name[scope_date.weekday()]
     order["order_date"] = datetime.strftime(pytz.timezone("Europe/Paris").localize(scope_date, is_dst=True).astimezone(pytz.utc), "%Y-%m-%dT%H:%M:%S") + "+00:00"
-    order["order_id"] = random.randint(100000, 999999)
 
     id_exists = True
     while id_exists:
@@ -112,7 +112,7 @@ def generate_order(gender, scope_date):
             order_ids.append(order_id)
     order["order_id"] = order_id
 
-    order["products"] = []
+    order["products"] = generate_products(gender, scope_date)
 
     order["taxful_total_price"] = 0
     order["taxless_total_price"] = 0
@@ -120,13 +120,111 @@ def generate_order(gender, scope_date):
     order["total_unique_products"] = 0
 
     order["sku"] = []
+    order["manufacturer"] = []
+    order["categories"] = []
+
+    for product in order["products"]:
+        order["taxful_total_price"] += product["taxful_price"] * product["quantity"]
+        order["taxless_total_price"] += product["taxless_price"] * product["quantity"]
+        order["total_quantity"] += product["quantity"]
+        order["total_unique_products"] += 1
+        order["sku"].append(product["sku"])
+        order["manufacturer"].append(product["manufacturer"])
+        order["categories"].append(product["main_category"])
+
+    order["taxless_total_price"] = float("{0:.2f}".format(order["taxless_total_price"]))
+    order["taxful_total_price"] = float("{0:.2f}".format(order["taxless_total_price"]))
 
     order["type"] = "order"
 
     return order
 
 
-generate_customers = True
+def generate_products(gender, scope_date):
+
+    products = []
+
+    tmp = random.randint(1, 100)
+    if tmp < 75:
+        items_count = random.randint(1,3)
+    else:
+        items_count = random.randint(3,5)
+
+    import json
+
+    with open('data/items_decathlon.fr-2021-11-18T02_47_18.726000.json') as f:
+        data = json.load(f)
+
+        for i in range(0, items_count):
+
+            product_is_ok = False
+            while not product_is_ok:
+                try:
+
+                    item = data[random.randint(0,8900)]
+                    product = {}
+
+
+                    if 'regularPrice' in item["offers"][0]:
+                        product["base_price"] = float("{0:.2f}".format(float(item["offers"][0]["regularPrice"]) * 0.8))
+                        product["discount_percentage"] = float("{0:.2f}".format((float(item["offers"][0]["price"]) * 100 / float(item["offers"][0]["regularPrice"])) * 0.8 / 100))
+                    else:
+                        product["base_price"] = float("{0:.2f}".format(float(item["offers"][0]["price"]) * 0.8))
+                        product["discount_percentage"] = 0.0
+
+                    tmp = random.randint(1,100)
+                    if tmp > 75 and float(item["offers"][0]["price"]) < 30:
+                         product["quantity"] = random.randint(2,3)
+                    else:
+                        product["quantity"] = 1
+                    if "brand" in item:
+                        product["manufacturer"] = item["brand"]
+                    else:
+                        product["manufacturer"] = -1
+                    product["tax_amount"] = float("{0:.2f}".format((float(item["offers"][0]["price"]) * 0.8) * 0.2))
+
+                    product["main_category"] = item["breadcrumbs"][2]["name"]
+                    product["categories"] = []
+
+                    for j in item["breadcrumbs"]:
+                        if j["name"] != "Accueil" and j["name"] != "Tous les sports" and j["name"] != "Decathlon":
+                            product["categories"].append(j["name"])
+
+                    if "sku" in item:
+                        product["sku"] = item['sku']
+                    else:
+                        id_exists = True
+                        while id_exists:
+                            sku_id = random.randint(10000, 99999)
+                            if sku_id not in sku_ids:
+                                id_exists = False
+                                product["sku"] = sku_id
+                                product["product_id"] = sku_id
+                                sku_ids.append(sku_id)
+
+                    product["taxless_price"] = float("{0:.2f}".format(float(item["offers"][0]["price"]) * 0.8))
+
+                    if 'regularPrice' in item:
+                        product["discount_amount"] = float("{0:.2f}".format(float(item["offers"][0]["regularPrice"]) - float(item["offers"][0]["price"])))
+                    else:
+                        product["discount_amount"] = 0
+                    product["product_name"] = item['name']
+                    product["price"] = float("{0:.2f}".format(float(item["offers"][0]["price"]) * 0.8))
+                    product["taxful_price"] = float("{0:.2f}".format(float(item["offers"][0]["price"])))
+
+                    products.append(product)
+                    product_is_ok = True
+
+                except Exception as e:
+                    print(e)
+                    pass
+
+
+    return products
+
+
+
+generate_customers = False
 if generate_customers:
     # count = random.randint(19000,21000)
     count = 20
@@ -144,44 +242,49 @@ if generate_customers:
 
     keys = customers[0].keys()
 
-    with open('data/customers.csv', 'w', newline='', encoding='utf-8') as output_file:
-        dict_writer = csv.DictWriter(output_file, keys, delimiter=';')
-        dict_writer.writeheader()
-        dict_writer.writerows(customers)
+    import json
+
+    with open('data/customers.json', 'w', encoding='utf-8') as f:
+        json.dump(customers, f, ensure_ascii=False, indent=4)
 
 
 current_date = date(2021, 12, 15)
-from_date = date(2021, 8, 1)
+from_date = date(2021, 12, 8)
 
-generate_orders = False
+generate_orders = True
 if generate_orders:
-    for i in range((current_date - from_date).days + 1):
 
-        orders = []
+    orders = []
+
+    for i in range((current_date - from_date).days + 1):
 
         scope_date = from_date + timedelta(days=i)
 
         if scope_date.weekday() > 4:
-            count_orders = random.randint(240,360)
+            #count_orders = random.randint(240,360)
+            count_orders = random.randint(10, 20)
         if scope_date.weekday() <= 4:
-            count_orders = random.randint(60,120)
+            #count_orders = random.randint(60,120)
+            count_orders = random.randint(5, 10)
 
         male_count = int(count_orders * (random.randint(50, 60) / 100))
         female_count = count_orders - male_count
 
         for i in range(0, male_count):
             order = generate_order("H", generate_hour(scope_date))
+            order.update(generate_profile("M", "FR"))
             orders.append(order)
-        for i in range(0, male_count):
+        for i in range(0, female_count):
             order = generate_order("F", generate_hour(scope_date))
+            order.update(generate_profile("F", "FR"))
             orders.append(order)
 
-        upload = False
-        if upload:
-            es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+    upload = True
+    if upload:
+        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
-            res = helpers.bulk(
-                es,
-                orders,
-                index="heptathlon",
-            )
+        res = helpers.bulk(
+            es,
+            orders,
+            index="heptathlon",
+        )
