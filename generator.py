@@ -23,6 +23,7 @@ normalize = str.maketrans(normalMap)
 
 customer_ids = []
 order_ids = []
+order_ids = []
 sku_ids = []
 
 Faker = Factory.create
@@ -261,11 +262,11 @@ if generate_orders:
         scope_date = from_date + timedelta(days=i)
 
         if scope_date.weekday() > 4:
-            #count_orders = random.randint(240,360)
-            count_orders = random.randint(10, 20)
+            count_orders = random.randint(240,360)
+            #count_orders = random.randint(10, 20)
         if scope_date.weekday() <= 4:
-            #count_orders = random.randint(60,120)
-            count_orders = random.randint(5, 10)
+            count_orders = random.randint(60,120)
+            #count_orders = random.randint(5, 10)
 
         male_count = int(count_orders * (random.randint(50, 60) / 100))
         female_count = count_orders - male_count
@@ -279,12 +280,12 @@ if generate_orders:
             order.update(generate_profile("F", "FR"))
             orders.append(order)
 
-    upload = True
-    if upload:
-        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        upload = True
+        if upload:
+            es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
-        res = helpers.bulk(
-            es,
-            orders,
-            index="heptathlon",
-        )
+            res = helpers.bulk(
+                es,
+                orders,
+                index="heptathlon",
+            )
