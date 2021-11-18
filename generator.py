@@ -1,9 +1,7 @@
 import random, time, itertools
 import csv
 from datetime import date, timedelta, datetime
-from dateutil.relativedelta import relativedelta
 from faker.factory import Factory
-import unidecode
 import calendar, pytz
 from elasticsearch import Elasticsearch, helpers
 
@@ -23,12 +21,18 @@ normalMap = {'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A',
              '§': 'S',  '³': '3', '²': '2', '¹': '1'}
 normalize = str.maketrans(normalMap)
 
+customer_ids = []
+order_ids = []
+
 Faker = Factory.create
 
 
 def generate_hour(scope_date):
     if random.randint(1,100) < 75 :
-        hrs = random.randint(10, 20)
+        if random.randint(1, 100) < 66:
+            hrs = random.randint(18, 20)
+        else:
+            hrs = random.randint(10, 18)
     else:
         nums = list(itertools.chain(
             range(0, 9),
@@ -52,7 +56,15 @@ def generate_profile(gender, country):
     profile["geoip"] = {}
     profile["geoip"]["country_iso_code"] = "FR"
     profile["currency"] = "EUR"
-    profile["customer_id"] = random.randint(10000, 99999)
+
+    id_exists = True
+    while id_exists:
+        customer_id = random.randint(10000, 99999)
+        if customer_id not in customer_ids:
+            id_exists = False
+            customer_ids.append(customer_id)
+    profile["customer_id"] = customer_id
+
     profile["customer_gender"] = gender
     profile["customer_phone"] = fake.phone_number()
     if gender == "M":
@@ -65,7 +77,16 @@ def generate_profile(gender, country):
 
         with open('data/french_cities.csv') as f:
             reader = csv.reader(f, delimiter=';')
-            random_row = random.choice(list(reader))
+
+            reader_list = list(reader)
+            has_coordinates = False
+            while not has_coordinates:
+
+                random_row = reader_list[random.randint(0,39191)]
+
+                if random_row[5] != "":
+                    has_coordinates = True
+
             profile["geoip"]["city_name"] = random_row[1]
             profile["geoip"]["zip_code"] = random_row[2]
             profile["geoip"]["location"] = {}
@@ -83,6 +104,14 @@ def generate_order(gender, scope_date):
     order["order_date"] = datetime.strftime(pytz.timezone("Europe/Paris").localize(scope_date, is_dst=True).astimezone(pytz.utc), "%Y-%m-%dT%H:%M:%S") + "+00:00"
     order["order_id"] = random.randint(100000, 999999)
 
+    id_exists = True
+    while id_exists:
+        order_id = random.randint(10000, 99999)
+        if order_id not in order_ids:
+            id_exists = False
+            order_ids.append(order_id)
+    order["order_id"] = order_id
+
     order["products"] = []
 
     order["taxful_total_price"] = 0
@@ -96,34 +125,63 @@ def generate_order(gender, scope_date):
 
     return order
 
+
+generate_customers = True
+if generate_customers:
+    # count = random.randint(19000,21000)
+    count = 20
+    male_count = int(count * (random.randint(55,67)/10))
+    female_count = count - male_count
+
+    customers = []
+
+    for i in range(1, male_count):
+        customers.append(generate_profile('M', 'FR'))
+    for i in range(1, female_count):
+        customers.append(generate_profile('F', 'FR'))
+
+    import csv
+
+    keys = customers[0].keys()
+
+    with open('data/customers.csv', 'w', newline='', encoding='utf-8') as output_file:
+        dict_writer = csv.DictWriter(output_file, keys, delimiter=';')
+        dict_writer.writeheader()
+        dict_writer.writerows(customers)
+
+
 current_date = date(2021, 12, 15)
 from_date = date(2021, 8, 1)
 
-for i in range((current_date - from_date).days + 1):
+generate_orders = False
+if generate_orders:
+    for i in range((current_date - from_date).days + 1):
 
-    orders = []
+        orders = []
 
-    scope_date = from_date + timedelta(days=i)
+        scope_date = from_date + timedelta(days=i)
 
-    if scope_date.weekday() > 4:
-        count_orders = random.randint(240,360)
-    if scope_date.weekday() <= 4:
-        count_orders = random.randint(60,120)
+        if scope_date.weekday() > 4:
+            count_orders = random.randint(240,360)
+        if scope_date.weekday() <= 4:
+            count_orders = random.randint(60,120)
 
-    male_count = int(count_orders * (random.randint(50, 60) / 100))
-    female_count = count_orders - male_count
+        male_count = int(count_orders * (random.randint(50, 60) / 100))
+        female_count = count_orders - male_count
 
-    for i in range(0, male_count):
-        order = generate_order("H", generate_hour(scope_date))
-        orders.append(order)
-    for i in range(0, male_count):
-        order = generate_order("F", generate_hour(scope_date))
-        orders.append(order)
+        for i in range(0, male_count):
+            order = generate_order("H", generate_hour(scope_date))
+            orders.append(order)
+        for i in range(0, male_count):
+            order = generate_order("F", generate_hour(scope_date))
+            orders.append(order)
 
-    es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        upload = False
+        if upload:
+            es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
-    res = helpers.bulk(
-        es,
-        orders,
-        index="heptathlon",
-    )
+            res = helpers.bulk(
+                es,
+                orders,
+                index="heptathlon",
+            )
