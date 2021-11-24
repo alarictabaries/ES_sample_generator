@@ -92,35 +92,10 @@ PUT /heptathlon
               }
             },
             "location" : {
-              "properties" : {
-                "lat" : {
-                  "type" : "text",
-                  "fields" : {
-                    "keyword" : {
-                      "type" : "keyword",
-                      "ignore_above" : 256
-                    }
-                  }
-                },
-                "lon" : {
-                  "type" : "text",
-                  "fields" : {
-                    "keyword" : {
-                      "type" : "keyword",
-                      "ignore_above" : 256
-                    }
-                  }
-                }
-              }
+              "type": "geo_point"
             },
             "zip_code" : {
-              "type" : "text",
-              "fields" : {
-                "keyword" : {
-                  "type" : "keyword",
-                  "ignore_above" : 256
-                }
-              }
+              "type" : "keyword",
             }
           }
         },

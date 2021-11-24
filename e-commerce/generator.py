@@ -1,10 +1,9 @@
-import random, time, itertools
-import csv
+import random, itertools
 from datetime import date, timedelta, datetime
 from faker.factory import Factory
 import calendar, pytz
 from elasticsearch import Elasticsearch, helpers
-
+import csv
 
 normalMap = {'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A',
              'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'ª': 'A',
@@ -30,7 +29,7 @@ Faker = Factory.create
 
 
 def generate_hour(scope_date):
-    if random.randint(1,100) < 75 :
+    if random.randint(1,100) < 76 :
         if random.randint(1, 100) < 66:
             hrs = random.randint(18, 20)
         else:
@@ -92,8 +91,8 @@ def generate_profile(gender, country):
             profile["geoip"]["city_name"] = random_row[1]
             profile["geoip"]["zip_code"] = random_row[2]
             profile["geoip"]["location"] = {}
-            profile["geoip"]["location"]["lon"] = random_row[5].split(',')[0]
-            profile["geoip"]["location"]["lat"] = random_row[5].split(',')[1]
+            profile["geoip"]["location"]["lat"] = random_row[5].split(',')[0]
+            profile["geoip"]["location"]["lon"] = random_row[5].split(',')[1]
 
     return profile
 
@@ -146,7 +145,7 @@ def generate_products(gender, scope_date):
     products = []
 
     tmp = random.randint(1, 100)
-    if tmp < 75:
+    if tmp < 74:
         items_count = random.randint(1,3)
     else:
         items_count = random.randint(3,5)
@@ -174,8 +173,8 @@ def generate_products(gender, scope_date):
                         product["discount_percentage"] = 0.0
 
                     tmp = random.randint(1,100)
-                    if tmp > 75 and float(item["offers"][0]["price"]) < 30:
-                         product["quantity"] = random.randint(2,3)
+                    if tmp > 72 and float(item["offers"][0]["price"]) < 30:
+                        product["quantity"] = random.randint(2,3)
                     else:
                         product["quantity"] = 1
                     if "brand" in item:
@@ -213,12 +212,60 @@ def generate_products(gender, scope_date):
                     product["price"] = float("{0:.2f}".format(float(item["offers"][0]["price"]) * 0.8))
                     product["taxful_price"] = float("{0:.2f}".format(float(item["offers"][0]["price"])))
 
-                    products.append(product)
                     product_is_ok = True
+
+                    # not a lot of ski products before month 10
+                    if int(str(scope_date.date()).split("-")[1]) < 11:
+
+                        winter_trigger = False
+
+                        for category in product['categories']:
+                            if "ski" in category.lower():
+                                winter_trigger = True
+
+                        tmp = random.randint(1,100)
+                        if winter_trigger:
+                            if tmp > 86:
+                                product_is_ok = True
+                            else:
+                                product_is_ok = False
+
+                    # not a lot of bike and running products before month 10
+                    if int(str(scope_date.date()).split("-")[1]) > 10:
+                        summer_trigger = False
+
+                        for category in product['categories']:
+                            if "vélo" in category.lower() or "vélo" in category.lower():
+                                summer_trigger = True
+
+                        tmp = random.randint(1, 100)
+                        if summer_trigger:
+                            if tmp > 62:
+                                product_is_ok = True
+                            else:
+                                product_is_ok = False
+
+                        # almost not surf after month 9
+                        if int(str(scope_date.date()).split("-")[1]) > 9:
+                            full_summer_trigger = False
+
+                            for category in product['categories']:
+                                if "surf" in category.lower():
+                                    full_summer_trigger = True
+
+                            tmp = random.randint(1, 100)
+                            if full_summer_trigger:
+                                if tmp > 89:
+                                    product_is_ok = True
+                                else:
+                                    product_is_ok = False
+
 
                 except Exception as e:
                     print(e)
                     pass
+
+            products.append(product)
 
 
     return products
@@ -239,8 +286,6 @@ if generate_customers:
     for i in range(1, female_count):
         customers.append(generate_profile('F', 'FR'))
 
-    import csv
-
     keys = customers[0].keys()
 
     import json
@@ -249,8 +294,8 @@ if generate_customers:
         json.dump(customers, f, ensure_ascii=False, indent=4)
 
 
-current_date = date(2021, 12, 15)
-from_date = date(2021, 12, 8)
+current_date = date(2021, 10, 15)
+from_date = date(2021, 9, 15)
 
 generate_orders = True
 if generate_orders:

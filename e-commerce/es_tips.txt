@@ -1,0 +1,14 @@
+scripted field zip code to dpt:
+return doc['geoip.zip_code'].value.substring(0,2);
+
+PUT heptathlon/_mapping
+{
+  "runtime": {
+    "geoip.dpt_code": {
+      "type": "long",
+      "script": {
+        "source": "return doc['geoip.zip_code'].value.substring(0,2);"
+      }
+    }
+  }
+}
