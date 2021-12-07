@@ -2,24 +2,6 @@ PUT /hal-utln
 {
     "mappings" : {
       "properties" : {
-        "af_abstract_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "af_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
         "authEmailDomain_s" : {
           "type" : "text",
           "fields" : {
@@ -96,36 +78,6 @@ PUT /hal-utln
           }
         },
         "country_s" : {
-          "type" : "text"
-        },
-        "cs_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "da_abstract_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "da_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "de_keyword_s" : {
           "type" : "text",
           "fields" : {
             "keyword" : {
@@ -182,33 +134,6 @@ PUT /hal-utln
             }
           }
         },
-        "es_abstract_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "es_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "et_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
         "fileMain_s" : {
           "type" : "text",
           "fields" : {
@@ -255,27 +180,15 @@ PUT /hal-utln
           }
         },
         "instStructCountry_s" : {
-          "type" : "keyword"
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
         },
         "instStructName_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "it_abstract_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "it_keyword_s" : {
           "type" : "text",
           "fields" : {
             "keyword" : {
@@ -321,7 +234,13 @@ PUT /hal-utln
           }
         },
         "labStructCountry_s" : {
-          "type" : "keyword"
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
         },
         "location" : {
           "type" : "text",
@@ -334,24 +253,6 @@ PUT /hal-utln
         },
         "modifiedDate_tdate" : {
           "type" : "date"
-        },
-        "nl_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "no_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
         },
         "openAccess_bool" : {
           "type" : "boolean"
@@ -367,24 +268,6 @@ PUT /hal-utln
         },
         "producedDate_tdate" : {
           "type" : "date"
-        },
-        "pt_abstract_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "pt_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
         },
         "publicationDate_tdate" : {
           "type" : "date"
@@ -425,70 +308,7 @@ PUT /hal-utln
             }
           }
         },
-        "ro_abstract_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "ro_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "ru_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
         "scientificEditor_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "sk_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "sl_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "so_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "sq_keyword_s" : {
           "type" : "text",
           "fields" : {
             "keyword" : {
@@ -507,7 +327,13 @@ PUT /hal-utln
           }
         },
         "structCountry_s" : {
-          "type" : "text"
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
         },
         "structId_i" : {
           "type" : "long"
@@ -523,35 +349,7 @@ PUT /hal-utln
               "ignore_above" : 256
             }
           }
-        },
-        "tl_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "tr_keyword_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
-        },
-        "zh_abstract_s" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "type" : "keyword",
-              "ignore_above" : 256
-            }
-          }
         }
       }
     }
   }
-}

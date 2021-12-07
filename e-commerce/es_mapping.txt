@@ -1,4 +1,4 @@
-PUT /heptathlon
+PUT /decathlon
 {
   "mappings": {
     "properties": {
@@ -95,7 +95,7 @@ PUT /heptathlon
               "type": "geo_point"
             },
             "zip_code" : {
-              "type" : "keyword",
+              "type":  "keyword"
             }
           }
         },

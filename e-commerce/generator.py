@@ -212,54 +212,17 @@ def generate_products(gender, scope_date):
                     product["price"] = float("{0:.2f}".format(float(item["offers"][0]["price"]) * 0.8))
                     product["taxful_price"] = float("{0:.2f}".format(float(item["offers"][0]["price"])))
 
+                    if scope_date.month < 11:
+                        if any("ski" in s.lower() for s in product["categories"]):
+                            if random.randint(0,100) < 80:
+                                product_is_ok = False
+
+                    if scope_date.month < 11:
+                        if any("gants" in s.lower() for s in product["categories"]):
+                            if random.randint(0,100) < 60:
+                                product_is_ok = False
+
                     product_is_ok = True
-
-                    # not a lot of ski products before month 10
-                    if int(str(scope_date.date()).split("-")[1]) < 11:
-
-                        winter_trigger = False
-
-                        for category in product['categories']:
-                            if "ski" in category.lower():
-                                winter_trigger = True
-
-                        tmp = random.randint(1,100)
-                        if winter_trigger:
-                            if tmp > 86:
-                                product_is_ok = True
-                            else:
-                                product_is_ok = False
-
-                    # not a lot of bike and running products before month 10
-                    if int(str(scope_date.date()).split("-")[1]) > 10:
-                        summer_trigger = False
-
-                        for category in product['categories']:
-                            if "vélo" in category.lower() or "vélo" in category.lower():
-                                summer_trigger = True
-
-                        tmp = random.randint(1, 100)
-                        if summer_trigger:
-                            if tmp > 62:
-                                product_is_ok = True
-                            else:
-                                product_is_ok = False
-
-                        # almost not surf after month 9
-                        if int(str(scope_date.date()).split("-")[1]) > 9:
-                            full_summer_trigger = False
-
-                            for category in product['categories']:
-                                if "surf" in category.lower():
-                                    full_summer_trigger = True
-
-                            tmp = random.randint(1, 100)
-                            if full_summer_trigger:
-                                if tmp > 89:
-                                    product_is_ok = True
-                                else:
-                                    product_is_ok = False
-
 
                 except Exception as e:
                     print(e)
@@ -294,8 +257,8 @@ if generate_customers:
         json.dump(customers, f, ensure_ascii=False, indent=4)
 
 
-current_date = date(2021, 10, 15)
-from_date = date(2021, 9, 15)
+current_date = date(2021, 12, 15)
+from_date = date(2021, 10, 15)
 
 generate_orders = True
 if generate_orders:
@@ -307,13 +270,13 @@ if generate_orders:
         scope_date = from_date + timedelta(days=i)
 
         if scope_date.weekday() > 4:
-            count_orders = random.randint(240,360)
+            count_orders = random.randint(97,142)
             #count_orders = random.randint(10, 20)
         if scope_date.weekday() <= 4:
-            count_orders = random.randint(60,120)
+            count_orders = random.randint(38,77)
             #count_orders = random.randint(5, 10)
 
-        male_count = int(count_orders * (random.randint(50, 60) / 100))
+        male_count = int(count_orders * (random.randint(52, 62) / 100))
         female_count = count_orders - male_count
 
         for i in range(0, male_count):
@@ -332,5 +295,5 @@ if generate_orders:
             res = helpers.bulk(
                 es,
                 orders,
-                index="heptathlon",
+                index="decathlon",
             )

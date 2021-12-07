@@ -5,12 +5,12 @@ from elasticsearch import Elasticsearch, helpers
 def findPublications(idHal, field, increment=0):
 
     articles = []
-    flags = 'docid,halId_s,title_s,*_keyword_s,*_abstract_s,authEmailDomain_s,authFullName_s,authIdHal_s,authStructId_i,city_s,authOrganism_s,collCategory_s,collName_s,coordinates_s,country_s,deptStructAcronym_s,deptStructCountry_s' \
+    flags = 'docid,halId_s,title_s,en_keyword_s,en_abstract_s,fr_keyword_s,fr_abstract_s,authEmailDomain_s,authFullName_s,authIdHal_s,authStructId_i,city_s,authOrganism_s,collCategory_s,collName_s,coordinates_s,country_s,deptStructAcronym_s,deptStructCountry_s' \
             'domainAllCode_s,domain_s,doiId_s,fileMain_s,fulltext_t,instStructCountry_s,instStructName_s,instStructAcronym_s,journalPublisher_s,journalSherpaColor_s,journalTitle_s,labStructAcronym_s,labStructCountry_s,location,' \
             'openAccess_bool,modifiedDate_tdate,primaryDomain_s,producedDate_tdate,publicationDate_tdate,publisher_s,publicationLocation_s,rgrpInstStructAcronym_s,rgrpLabStructAcronym_s,scientificEditor_s,structAcronym_s,structCountry_s,structId_i,' \
             'structName_t,submittedDate_tdate,licence_t'
 
-    req = requests.get('http://api.archives-ouvertes.fr/search/?q=' + field + ':' + str(idHal) + '&fl=' + flags + '&start=' + str(increment))
+    req = requests.get('http://api.archives-ouvertes.fr/search/?q=' + field + ':' + str(idHal) + '&fl=' + flags + '&start=' + str(increment) + '&fq=submittedDateY_i:[2011 TO *]')
 
     if req.status_code == 200:
         data = req.json()
@@ -49,7 +49,7 @@ def findPublications(idHal, field, increment=0):
 
                 articles.append(article)
 
-            upload = False
+            upload = True
             if upload:
                 es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
