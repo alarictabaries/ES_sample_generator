@@ -166,10 +166,10 @@ def generate_products(gender, scope_date):
 
 
                     if 'regularPrice' in item["offers"][0]:
-                        product["base_price"] = float("{0:.2f}".format(float(item["offers"][0]["regularPrice"]) * 0.8))
-                        product["discount_percentage"] = float("{0:.2f}".format((float(item["offers"][0]["price"]) * 100 / float(item["offers"][0]["regularPrice"])) * 0.8 / 100))
+                        product["base_price"] = float("{0:.2f}".format(float(item["offers"][0]["regularPrice"])))
+                        product["discount_percentage"] = float("{0:.2f}".format(1 - (( float(item["offers"][0]["price"]) * 100 / float(item["offers"][0]["regularPrice"]) / 100 ))))
                     else:
-                        product["base_price"] = float("{0:.2f}".format(float(item["offers"][0]["price"]) * 0.8))
+                        product["base_price"] = float("{0:.2f}".format(float(item["offers"][0]["price"])))
                         product["discount_percentage"] = 0.0
 
                     tmp = random.randint(1,100)
@@ -204,12 +204,13 @@ def generate_products(gender, scope_date):
 
                     product["taxless_price"] = float("{0:.2f}".format(float(item["offers"][0]["price"]) * 0.8))
 
-                    if 'regularPrice' in item:
+                    if 'regularPrice' in item["offers"][0]:
                         product["discount_amount"] = float("{0:.2f}".format(float(item["offers"][0]["regularPrice"]) - float(item["offers"][0]["price"])))
                     else:
                         product["discount_amount"] = 0
+
                     product["product_name"] = item['name']
-                    product["price"] = float("{0:.2f}".format(float(item["offers"][0]["price"]) * 0.8))
+                    product["price"] = float("{0:.2f}".format(float(item["offers"][0]["price"])))
                     product["taxful_price"] = float("{0:.2f}".format(float(item["offers"][0]["price"])))
 
                     if scope_date.month < 11:
@@ -258,7 +259,7 @@ if generate_customers:
 
 
 current_date = date(2021, 12, 15)
-from_date = date(2021, 10, 15)
+from_date = date(2021, 9, 15)
 
 generate_orders = True
 if generate_orders:
@@ -270,10 +271,10 @@ if generate_orders:
         scope_date = from_date + timedelta(days=i)
 
         if scope_date.weekday() > 4:
-            count_orders = random.randint(97,142)
+            count_orders = random.randint(127,172)
             #count_orders = random.randint(10, 20)
         if scope_date.weekday() <= 4:
-            count_orders = random.randint(38,77)
+            count_orders = random.randint(58,87)
             #count_orders = random.randint(5, 10)
 
         male_count = int(count_orders * (random.randint(52, 62) / 100))
@@ -288,12 +289,12 @@ if generate_orders:
             order.update(generate_profile("F", "FR"))
             orders.append(order)
 
-        upload = True
-        if upload:
-            es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+    upload = True
+    if upload:
+        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
-            res = helpers.bulk(
-                es,
-                orders,
-                index="decathlon",
-            )
+        res = helpers.bulk(
+            es,
+            orders,
+            index="decathlon",
+        )

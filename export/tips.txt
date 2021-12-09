@@ -6,3 +6,5 @@ elasticdump --input=http://localhost:9200/hal-utln --output=decathlon_mapping.js
 
 elasticdump --input=./hal-utln_mapping.json --output=http://localhost:9200/hal-utln --type=mapping
 elasticdump --input=./hal-utln.json --output=http://localhost:9200/hal-utln --type=data
+
+elasticdump --input=http://localhost:9200/decathlon --output=decathlon.json --type=data
