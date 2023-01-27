@@ -1,6 +1,6 @@
 import random, itertools
 from datetime import date, timedelta, datetime
-from faker.factory import Factory
+from faker import Faker
 import calendar, pytz
 from elasticsearch import Elasticsearch, helpers
 import csv
@@ -25,8 +25,7 @@ order_ids = []
 order_ids = []
 sku_ids = []
 
-Faker = Factory.create
-
+fake = Faker()
 
 def generate_hour(scope_date):
     if random.randint(1,100) < 76 :
@@ -51,7 +50,7 @@ def generate_profile(gender, country):
     if country == 'FR':
         fake = Faker('fr_FR')
 
-    fake.seed(random.randint(1, 99999))
+    Faker.seed(random.randint(1, 99999))
 
     profile = {}
     profile["geoip"] = {}
@@ -258,8 +257,8 @@ if generate_customers:
         json.dump(customers, f, ensure_ascii=False, indent=4)
 
 
-current_date = date(2021, 12, 15)
-from_date = date(2021, 9, 15)
+current_date = date(2023, 2, 7)
+from_date = date(2022, 11, 7)
 
 generate_orders = True
 if generate_orders:
@@ -291,7 +290,7 @@ if generate_orders:
 
     upload = True
     if upload:
-        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        es = Elasticsearch(hosts="http://elastic:changeme@localhost:9200/")
 
         res = helpers.bulk(
             es,
