@@ -3,6 +3,24 @@ from datetime import date, timedelta, datetime
 from faker import Faker
 import calendar, pytz
 import csv
+import os
+
+filename = "data_1.csv"
+variant = 0
+
+lines_count = 0
+
+file_exists = os.path.isfile(filename)
+if not file_exists or os.stat(filename).st_size == 0:
+    write_header = True
+else:
+    write_header = False
+
+fn = ["day_of_week_i", "day_of_week", "order_date", "shipping", "order_id", "sku", "manufacturer", "type", "currency",
+      "customer_id", "customer_gender", "customer_phone", "customer_name", "customer_email", "category",
+      "country_iso_code", "city_name", "zip_code", "location_lat", "location_lon", "base_price", "discount_percentage",
+      "quantity", "tax_amount", "main_category", "taxless_total_price", "discount_amount", "product_name", "price",
+      "taxful_total_price"]
 
 normalMap = {'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A',
              'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'ª': 'A',
@@ -104,6 +122,8 @@ def generate_order(gender, scope_date):
 
     shipping = ["express", "standard", "click_and_collect", "economic"]
     order["shipping"] = random.choice(shipping)
+
+
 
 
     id_exists = True
@@ -285,6 +305,19 @@ if generate_orders:
 
         # converting to csv (flat)
 
+        # création des variantes
+        fn = ["day_of_week_i", "day_of_week", "order_date", "shipping", "order_id", "sku", "manufacturer", "type",
+              "currency", "customer_id", "customer_gender", "customer_phone", "customer_name", "customer_email",
+              "category", "country_iso_code", "city_name", "zip_code", "location_lat", "location_lon", "base_price",
+              "discount_percentage", "quantity", "tax_amount", "main_category", "taxless_total_price",
+              "discount_amount", "product_name", "price", "taxful_total_price"]
+
+        if variant == 1:
+            fn.extend(["tax_rate", "payment_method", "customer_status", "shipping_carrier"])
+        if variant == 2:
+            fn.extend(["customer_age", "status", "payment_status", "customer_loyalty", "warranty_type", "coupon_used"])
+
+
         def convert_to_csv(order):
 
 
@@ -319,18 +352,84 @@ if generate_orders:
             order["price"] = order["products"][0]["price"]
             order["taxful_total_price"] = order["products"][0]["taxful_price"]
 
+
+            # création des variantes
+
+            if variant == 1:
+
+                order["tax_rate"] = 0.2
+                payment_methods = ["credit card", "paypal", "cash", "bank transfer", "gift card"]
+                order["payment_method"] = payment_methods[random.randint(0, 4)]
+
+                customer_status = ["new", "returning", "premium", "inactive", "banned"]
+                random_status = random.randint(1, 1000)
+                if random_status < 995:
+                    order["customer_status"] = customer_status[random.randint(0, 2)]
+                else:
+                    order["customer_status"] = customer_status[4]
+
+                order["shipping_carrier"] = ["Colissimo", "Chronopost", "UPS", "Mondial Relay"]
+                if order["shipping"] != "click_and_collect":
+                    order["shipping_carrier"] = order["shipping_carrier"][random.randint(0, 3)]
+                else:
+                    order["shipping_carrier"] = "none"
+
+            if variant == 2:
+
+                random_age = random.randint(1,6)
+                if random_age < 3:
+                    order["customer_age"] = random.randint(22,52)
+                else:
+                    order["customer_age"] = random.randint(18,89)
+
+                random_status = random.randint(1, 1000)
+                if (random_status > 930)  and (random_status < 945):
+                    order["status"] = "cancelled"
+                    order["payment_status"] = "refunded"
+                elif random_status > 945:
+                    order["status"] = "returned"
+                    order["payment_status"] = "refunded"
+                else:
+                    order["status"] = "completed"
+                    order["payment_status"] = "paid"
+
+                customer_loyalty = ["bronze", "silver", "gold", "platinum"]
+                order["customer_loyalty"] = customer_loyalty[random.randint(0,3)]
+
+                warranty_type = ["standard", "extended", "premium"]
+                order["warranty_type"] = warranty_type[random.randint(0,2)]
+
+                if order["discount_percentage"] > 0:
+                    coupon_random = random.randint(1,100)
+                    if coupon_random > 80:
+                        order["coupon_used"] = "yes"
+                    else:
+                        order["coupon_used"] = "no"
+                else:
+                    order["coupon_used"] = "no"
+
             del order["products"]
 
             return order
-        with open('data.csv', 'a', newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=["day_of_week_i", "day_of_week", "order_date", "shipping", "order_id", "sku", "manufacturer", "type", "currency", "customer_id", "customer_gender", "customer_phone", "customer_name", "customer_email", "category", "country_iso_code", "city_name", "zip_code", "location_lat", "location_lon", "base_price", "discount_percentage", "quantity", "tax_amount", "main_category", "taxless_total_price", "discount_amount", "product_name", "price", "taxful_total_price"])
+
+        if lines_count > 9999:
+            break
+            print("terminated generating orders")
+
+        with open(filename, 'a', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=fn)
+            if write_header:
+                writer.writeheader()
+                write_header = False
             for i in range(0, male_count):
                 order = generate_order("H", generate_hour(scope_date))
                 order.update(generate_profile("M", "FR"))
                 order = convert_to_csv(order)
+                lines_count += 1
                 writer.writerow(order)
             for i in range(0, female_count):
                 order = generate_order("F", generate_hour(scope_date))
                 order.update(generate_profile("F", "FR"))
                 order = convert_to_csv(order)
+                lines_count += 1
                 orders.append(order)

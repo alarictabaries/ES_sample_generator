@@ -288,7 +288,9 @@ if generate_orders:
             order.update(generate_profile("F", "FR"))
             orders.append(order)
 
-    upload = True
+        print(order)
+
+    upload = False
     if upload:
         es = Elasticsearch(hosts="http://elastic:changeme@localhost:9200/")
 
